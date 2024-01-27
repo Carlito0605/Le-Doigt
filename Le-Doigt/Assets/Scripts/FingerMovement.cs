@@ -28,6 +28,7 @@ public class FingerMovement : MonoBehaviour
     public float releaseFingerSpeed = 4f;
 
     public bool isDragged = false;
+    public bool canBeDragged = true;
 
     private float horizontalMovement;
 
@@ -41,12 +42,16 @@ public class FingerMovement : MonoBehaviour
 
     public GameObject tooFastUi;
 
+    public GameObject middleFinger;
+
     public Image sliderBackground;
+
+    Vector3 startScale;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        startScale = middleFinger.transform.localScale;
     }
 
     // Update is called once per frame
@@ -62,8 +67,8 @@ public class FingerMovement : MonoBehaviour
         {
             Success.instance.successMessage();
             targetVelocity = new Vector2(0, rb.velocity.y);
+            canBeDragged = false;
         }
-        //horizontalMovement = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime; //Calcul notre mouvemment horizontal avec Input.GetAxis("Horizontal") récupère input (->, <-, A, D)
         if (rb.transform.position.x < rangeMin) rb.velocity = new Vector2(0, 0);
         else if(isDragged == false && !isSuccess()) {
             rb.velocity = Vector3.SmoothDamp(rb.velocity, targetVelocity, ref velocity, 0.05f); //Ramène le doigt au début
@@ -74,7 +79,17 @@ public class FingerMovement : MonoBehaviour
         isDragged = false;
         MovePlayer(horizontalMovement); //Lance notre fonction Moveplayer en envoyant notre mouvement calculer au dessus
         currentMoveSpeed = GetCurrentMoveSpeed();
-       
+
+        middleFinger.transform.position = new Vector3(
+            (rb.transform.position.x - 3) / 2 - 1, 
+            rb.transform.position.y, 
+            rb.transform.position.z);
+
+        middleFinger.transform.localScale = new Vector3(
+                startScale.x + (rb.transform.position.x + 3) * 1.5f,
+                startScale.y,
+                startScale.z
+            );
     }
 
     public void MovePlayer(float _horizontalMovement) //Fonction qui fait bouger notre personnage
@@ -86,7 +101,7 @@ public class FingerMovement : MonoBehaviour
     void OnMouseDrag()
     {
         isDragged = true;
-        MovePlayer((GetMousePos().x - rb.transform.position.x) * moveSpeed);
+        if(canBeDragged) MovePlayer((GetMousePos().x - rb.transform.position.x) * moveSpeed);
     }
 
     Vector3 GetMousePos()
