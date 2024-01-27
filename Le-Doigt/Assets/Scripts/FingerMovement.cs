@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class FingerMovement : MonoBehaviour
 {
@@ -38,6 +39,10 @@ public class FingerMovement : MonoBehaviour
 
     public bool isTooFast = false;
 
+    public GameObject tooFastUi;
+
+    public Image sliderBackground;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -52,15 +57,20 @@ public class FingerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (isSuccess()) Debug.Log("Success !");
+        Vector3 targetVelocity = new Vector2(releaseFingerSpeed * -1, rb.velocity.y);
+        if (isSuccess())
+        {
+            Success.instance.successMessage();
+            targetVelocity = new Vector2(0, rb.velocity.y);
+        }
         //horizontalMovement = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime; //Calcul notre mouvemment horizontal avec Input.GetAxis("Horizontal") récupère input (->, <-, A, D)
-        Vector3 targetVelocity = new Vector2(releaseFingerSpeed * -1, rb.velocity.y); //Récupère le mouvement en 2D du joueur avec un Vector2
         if (rb.transform.position.x < rangeMin) rb.velocity = new Vector2(0, 0);
-        else if(isDragged == false) {
+        else if(isDragged == false && !isSuccess()) {
             rb.velocity = Vector3.SmoothDamp(rb.velocity, targetVelocity, ref velocity, 0.05f); //Ramène le doigt au début
         }
         updateIsTooFast();
-        Debug.Log(isTooFast);
+        tooFastUi.SetActive(isTooFast);
+        sliderBackground.color = isTooFast ? Color.red : Color.green;
         isDragged = false;
         MovePlayer(horizontalMovement); //Lance notre fonction Moveplayer en envoyant notre mouvement calculer au dessus
         currentMoveSpeed = GetCurrentMoveSpeed();
@@ -96,7 +106,7 @@ public class FingerMovement : MonoBehaviour
 
     bool isSuccess()
     {
-        return isDragged && !isTooFast && (rangeMax - rb.transform.position.x) <= 0.1f ;
+        return !isTooFast && (rangeMax - rb.transform.position.x) <= 0.1f ;
     }
 
     void updateIsTooFast()
