@@ -6,11 +6,27 @@ using UnityEngine.EventSystems;
 public class FingerMovement : MonoBehaviour
 {
 
+    public static FingerMovement instance;
+
+    private void Awake()
+    {
+        if (instance != null)
+        {
+            Debug.LogWarning("Il y a plus d'une instance de FingerMovement dans la scène");
+            return;
+        }
+
+        instance = this;
+    }
+
     public float rangeMin = -3f;
     public float rangeMax = 5f;
 
-    public float moveSpeed = 300f;
+    public float moveSpeed = 3f;
     public float currentMoveSpeed = 0f;
+    public float releaseFingerSpeed = 4f;
+
+    public bool isDragged = false;
 
     private float horizontalMovement;
 
@@ -32,9 +48,13 @@ public class FingerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        horizontalMovement = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime; //Calcul notre mouvemment horizontal avec Input.GetAxis("Horizontal") récupère input (->, <-, A, D)
-        MovePlayer(horizontalMovement); //Lance notre fonction Moveplayer en envoyant notre mouvement calculer au dessus
 
+        //horizontalMovement = Input.GetAxis("Horizontal") * moveSpeed * Time.deltaTime; //Calcul notre mouvemment horizontal avec Input.GetAxis("Horizontal") récupère input (->, <-, A, D)
+        Vector3 targetVelocity = new Vector2(releaseFingerSpeed * -1, rb.velocity.y); //Récupère le mouvement en 2D du joueur avec un Vector2
+        if (rb.transform.position.x < rangeMin) rb.velocity = new Vector2(0, 0);
+        else if(isDragged == false) rb.velocity = Vector3.SmoothDamp(rb.velocity, targetVelocity, ref velocity, 0.05f); //Ramène le doigt au début
+        isDragged = false;
+        MovePlayer(horizontalMovement); //Lance notre fonction Moveplayer en envoyant notre mouvement calculer au dessus
         currentMoveSpeed = GetCurrentMoveSpeed();
     }
 
@@ -49,7 +69,8 @@ public class FingerMovement : MonoBehaviour
     {
         //Debug.Log("OnMouseDrag");
         //transform.position = GetMousePos();
-        MovePlayer((GetMousePos().x - rb.transform.position.x) * 3f);
+        isDragged = true;
+        MovePlayer((GetMousePos().x - rb.transform.position.x) * moveSpeed);
     }
 
     Vector3 GetMousePos()
