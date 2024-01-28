@@ -68,6 +68,7 @@ public class FingerMovement : MonoBehaviour
             Success.instance.successMessage();
             targetVelocity = new Vector2(0, rb.velocity.y);
             canBeDragged = false;
+            GameManager.instance.Success(1);
         }
         if (rb.transform.position.x < rangeMin) rb.velocity = new Vector2(0, 0);
         else if(isDragged == false && !isSuccess()) {

@@ -30,7 +30,6 @@ public class Cursor : MonoBehaviour
     {
         rb.transform.position = GetMousePos();
         isClicked = Input.GetMouseButton(0);
-        Debug.Log(isClicked);
         spriteRenderer.sprite = isClicked ? cursorClickedImage : normalCursorImage;
     }
 
