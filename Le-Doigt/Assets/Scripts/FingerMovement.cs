@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.Audio;
 
 public class FingerMovement : MonoBehaviour
 {
@@ -46,6 +47,24 @@ public class FingerMovement : MonoBehaviour
 
     public Image sliderBackground;
 
+    public AudioClip successSound;
+    public AudioClip stretchSound;
+    public AudioClip stretchReleaseSound;
+    public AudioClip[] failedSounds;
+    public bool notAlreadyFailed = true;
+    public bool isStretching = false;
+    public AudioSource stretchAudioSource;
+
+    public enum StretchingState
+    {
+        NotStretching,
+        StartStretching,
+        Stretching,
+        Releasing
+    }
+
+    public StretchingState state = StretchingState.NotStretching;
+
     Vector3 startScale;
 
     // Start is called before the first frame update
@@ -70,6 +89,7 @@ public class FingerMovement : MonoBehaviour
             canBeDragged = false;
             GameManager.instance.Success(1);
             GameManager.instance.isSuccess = true;
+            AudioManager.instance.PlayClipAt(successSound, transform.position);
         }
         if (rb.transform.position.x < rangeMin) rb.velocity = new Vector2(0, 0);
         else if(isDragged == false && !isSuccess()) {
@@ -78,6 +98,12 @@ public class FingerMovement : MonoBehaviour
         updateIsTooFast();
         tooFastUi.SetActive(isTooFast);
         sliderBackground.color = isTooFast ? Color.red : Color.green;
+        if (isTooFast && notAlreadyFailed) 
+        {
+            AudioManager.instance.PlayClipAt(failedSounds[Random.Range(1, 8)], transform.position);
+            notAlreadyFailed = false;
+        }
+        if (isTooFast == false) notAlreadyFailed = true;
         isDragged = false;
         MovePlayer(0); //Lance notre fonction Moveplayer en envoyant notre mouvement calculer au dessus
         currentMoveSpeed = GetCurrentMoveSpeed();
@@ -92,6 +118,16 @@ public class FingerMovement : MonoBehaviour
                 startScale.y,
                 startScale.z
             );
+
+    
+        if (state == StretchingState.Stretching && !stretchAudioSource.isPlaying)
+        {
+            stretchAudioSource = AudioManager.instance.PlayClipAt(stretchSound, transform.position);
+        }
+        if (state == StretchingState.Releasing)
+        {
+            state = StretchingState.NotStretching;
+        }
     }
 
     public void MovePlayer(float _horizontalMovement) //Fonction qui fait bouger notre personnage
@@ -104,6 +140,21 @@ public class FingerMovement : MonoBehaviour
     {
         isDragged = true;
         if(canBeDragged) MovePlayer((GetMousePos().x - rb.transform.position.x) * moveSpeed);
+        if (state == StretchingState.NotStretching)
+        {
+            state = StretchingState.Stretching;
+            stretchAudioSource = AudioManager.instance.PlayClipAt(stretchSound, transform.position);
+        }
+    }
+
+    void OnMouseUp()
+    {
+        if (state == StretchingState.Stretching)
+        {
+            state = StretchingState.NotStretching;
+            stretchAudioSource.Stop();
+            AudioManager.instance.PlayClipAt(stretchReleaseSound, transform.position);
+        }
     }
 
     Vector3 GetMousePos()
