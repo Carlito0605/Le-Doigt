@@ -49,6 +49,12 @@ public class GameManager : MonoBehaviour
             titleUI.SetActive(false);
         }
 
+        if (Input.GetKeyDown("space"))
+        {
+            isSuccess = true;
+            successTimer = 1;
+        }
+
         if (successTimer > 0 && isSuccess)
         {
             successTimer -= Time.deltaTime;
