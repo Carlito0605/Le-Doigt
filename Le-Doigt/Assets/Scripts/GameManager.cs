@@ -16,6 +16,9 @@ public class GameManager : MonoBehaviour
     public GameObject firstFinger;
     public GameObject successUI;
 
+    public Vector3 cameraVelocity = Vector3.zero;
+    public Vector3 targetPosition;
+
     private void Awake()
     {
         if (instance != null)
@@ -30,7 +33,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        targetPosition = new Vector3(camera.transform.position.x, camera.transform.position.y + 10, camera.transform.position.z);
     }
 
     // Update is called once per frame
@@ -49,11 +52,11 @@ public class GameManager : MonoBehaviour
         if (successTimer > 0 && isSuccess)
         {
             successTimer -= Time.deltaTime;
+            camera.transform.position = Vector3.MoveTowards(camera.transform.position, targetPosition, 20f * Time.deltaTime);
         }
 
         if (isSuccess && successTimer <= 0)
         {
-            camera.transform.position = new Vector3(camera.transform.position.x, camera.transform.position.y + 10, camera.transform.position.z);
             isSuccess = false;
         }
 
@@ -67,6 +70,6 @@ public class GameManager : MonoBehaviour
         //firstFinger.GetComponent<FingerMovement>().moveSpeed = 0.0f;
         //firstFinger.GetComponent<FingerMovement>().currentMoveSpeed = 0.0f;
         firstFinger.GetComponent<FingerMovement>().enabled = false;
-        successTimer = 3;
+        successTimer = 1;
     }
 }

@@ -79,7 +79,7 @@ public class FingerMovement : MonoBehaviour
         tooFastUi.SetActive(isTooFast);
         sliderBackground.color = isTooFast ? Color.red : Color.green;
         isDragged = false;
-        MovePlayer(horizontalMovement); //Lance notre fonction Moveplayer en envoyant notre mouvement calculer au dessus
+        MovePlayer(0); //Lance notre fonction Moveplayer en envoyant notre mouvement calculer au dessus
         currentMoveSpeed = GetCurrentMoveSpeed();
 
         middleFinger.transform.position = new Vector3(
