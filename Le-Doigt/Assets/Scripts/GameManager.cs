@@ -51,9 +51,10 @@ public class GameManager : MonoBehaviour
             successTimer -= Time.deltaTime;
         }
 
-        if (successTimer == 0)
+        if (isSuccess && successTimer <= 0)
         {
             camera.transform.position = new Vector3(camera.transform.position.x, camera.transform.position.y + 10, camera.transform.position.z);
+            isSuccess = false;
         }
 
         successUI.SetActive(isSuccess);
